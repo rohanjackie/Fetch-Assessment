@@ -7,7 +7,6 @@ sqlalchemy
 psycopg2
 numpy
 
-
 PostgreSQL & pgAdmin Setup
 version: '3.8'
 services:
