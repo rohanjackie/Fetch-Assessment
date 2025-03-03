@@ -57,12 +57,17 @@ users_df["BIRTH_DATE"] = pd.to_datetime(users_df["BIRTH_DATE"], errors="coerce")
 transactions_df["PURCHASE_DATE"] = pd.to_datetime(transactions_df["PURCHASE_DATE"], errors="coerce")
 transactions_df["SCAN_DATE"] = pd.to_datetime(transactions_df["SCAN_DATE"], errors="coerce")
 
+
 #Convert BARCODE to string 
 products_df["BARCODE"] = products_df["BARCODE"].astype("float64").astype("str")
 transactions_df["BARCODE"] = transactions_df["BARCODE"].astype("float64").astype("str")
 
 print("Data Types After Conversion:")
 print(users_df.dtypes, transactions_df.dtypes, products_df.dtypes)
+
+print(users_df.head(100))
+print(transactions_df.head(100))
+print(products_df.head(100))
 
 #Handling missing values
 
@@ -94,14 +99,12 @@ top_brands = merged_df.groupby("BRAND")["FINAL_SALE"].sum().reset_index()
 top_brands = top_brands.sort_values(by="FINAL_SALE", ascending=False).head(5)
 
 
-
-
-
-
 #Bar Chart for Top 5 Stores by Transactions
 
 # Group by Category and Sum Sales
 category_sales = merged_df.groupby("CATEGORY_1")["FINAL_SALE"].sum().nlargest(5)
+
+
 
 
 # Get Top 5 Stores by Transaction Count
@@ -113,7 +116,7 @@ ax = sns.barplot(y=top_stores.index, x=top_stores.values, palette="coolwarm")
 
 
 # Add Titles and Labels
-plt.title("🏪 Top 5 Stores by Transactions", fontsize=16, fontweight="bold")
+plt.title("Top 5 Stores by Transactions", fontsize=16, fontweight="bold")
 plt.xlabel("Number of Transactions", fontsize=12)
 plt.ylabel("Store Name", fontsize=12)
 
@@ -131,19 +134,16 @@ plt.show()
 
 
 
-
 #Pie chart for Distribution of Sales by Generation
-
-# Convert BIRTH_DATE to datetime format
 users_df["BIRTH_DATE"] = pd.to_datetime(users_df["BIRTH_DATE"], errors="coerce")
 
-# Categorize Generations
-def get_generation(birth_year):
-    if birth_year >= 1997:
+# Define Generations
+def get_generation(year):
+    if year >= 1997:
         return "Gen Z"
-    elif birth_year >= 1981:
+    elif year >= 1981:
         return "Millennials"
-    elif birth_year >= 1965:
+    elif year >= 1965:
         return "Gen X"
     else:
         return "Boomers"
@@ -156,17 +156,15 @@ merged_df = transactions_df.merge(users_df, left_on="USER_ID", right_on="ID", ho
 # Convert FINAL_SALE to Numeric
 merged_df["FINAL_SALE"] = pd.to_numeric(merged_df["FINAL_SALE"], errors="coerce")
 
-# Group by Generation
-generation_sales = merged_df.groupby("Generation")["FINAL_SALE"].sum().reset_index()
+# Group Sales by Generation
+generation_sales = merged_df.groupby("Generation")["FINAL_SALE"].sum()
 
-# Plot the Distribution
-plt.figure(figsize=(10, 5))
-sns.barplot(data=generation_sales, x="Generation", y="FINAL_SALE", palette="coolwarm")
-plt.title("Total Sales by Generation")
-plt.ylabel("Total Sales ($)")
-plt.xlabel("Generation")
+# Plot Pie Chart
+plt.figure(figsize=(8, 8))
+generation_sales.plot(kind="pie", autopct="%1.1f%%", colormap="coolwarm", legend=True)
+plt.title("Sales Distribution by Generation")
+plt.ylabel("")
 plt.show()
-
 
 
 
@@ -193,5 +191,4 @@ transactions_df.to_sql("transactions", engine, if_exists="replace", index=False)
 users_df.to_sql("users", engine, if_exists="replace", index=False)
 
 print("Data Successfully Stored in PostgreSQL!")
-
 
